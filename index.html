@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Bonus Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calculator {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            flex: 1;
+            min-width: 110px;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-option label {
+            display: block;
+            padding: 12px 8px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-total {
+            font-size: 36px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .breakdown {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            color: #333;
+            padding-top: 10px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #1976d2;
+        }
+
+        .rph-calc {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .rph-inputs {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .rph-inputs input {
+            flex: 1;
+        }
+
+        .rph-result {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>💰 Daily Bonus Calculator</h1>
+        <p class="subtitle">Calculate your performance bonus</p>
+
+        <div class="info-box">
+            💡 RPH must be 125+ to earn a bonus
+        </div>
+
+        <form id="bonusForm">
+            <div class="form-group">
+                <label for="teamRevenue">Total Team Revenue ($)</label>
+                <input type="number" id="teamRevenue" min="0" step="0.01" required placeholder="Enter total revenue">
+            </div>
+
+            <div class="form-group">
+                <label>Your Role</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="trainee" name="role" value="trainee" required>
+                        <label for="trainee">Trainee<br>(1%)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="salesLead" name="role" value="salesLead">
+                        <label for="salesLead">Sales Lead<br>(2%)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="certifiedLead" name="role" value="certifiedLead">
+                        <label for="certifiedLead">Certified<br>(3%)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Team Composition</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="team_1d1n" name="teamComp" value="1d1n" required>
+                        <label for="team_1d1n">1 Driver<br>1 Navigator</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="team_2d" name="teamComp" value="2d">
+                        <label for="team_2d">2 Drivers</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="team_2d1n" name="teamComp" value="2d1n">
+                        <label for="team_2d1n">2 Drivers<br>1 Navigator</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="team_3d" name="teamComp" value="3d">
+                        <label for="team_3d">3 Drivers</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Your Position Today</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="driver" name="position" value="driver" required>
+                        <label for="driver">Driver</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="navigator" name="position" value="navigator">
+                        <label for="navigator">Navigator</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>RPH (Revenue Per Hour)</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="rphManual" name="rphMethod" value="manual" required>
+                        <label for="rphManual">Enter RPH</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="rphCalc" name="rphMethod" value="calculate">
+                        <label for="rphCalc">Calculate RPH</label>
+                    </div>
+                </div>
+
+                <div id="rphManualInput" class="hidden" style="margin-top: 10px;">
+                    <input type="number" id="rphValue" min="0" step="0.01" placeholder="Enter RPH value">
+                </div>
+
+                <div id="rphCalculator" class="hidden rph-calc">
+                    <div class="rph-inputs">
+                        <input type="number" id="hoursWorked" min="0" step="0.01" placeholder="Hours worked">
+                        <input type="number" id="revenueForRPH" min="0" step="0.01" placeholder="Team revenue">
+                    </div>
+                    <div id="rphCalcResult" class="rph-result hidden"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="calculate-btn">Calculate Bonus</button>
+        </form>
+
+        <div id="result" class="result">
+            <div class="result-total" id="totalBonus">$0.00</div>
+            <div class="breakdown" id="breakdown"></div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle RPH input methods
+        document.querySelectorAll('input[name="rphMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'manual') {
+                    document.getElementById('rphManualInput').classList.remove('hidden');
+                    document.getElementById('rphCalculator').classList.add('hidden');
+                } else {
+                    document.getElementById('rphManualInput').classList.add('hidden');
+                    document.getElementById('rphCalculator').classList.remove('hidden');
+                }
+            });
+        });
+
+        // Calculate RPH automatically
+        document.getElementById('hoursWorked').addEventListener('input', calculateRPH);
+        document.getElementById('revenueForRPH').addEventListener('input', calculateRPH);
+
+        function calculateRPH() {
+            const hours = parseFloat(document.getElementById('hoursWorked').value) || 0;
+            const revenue = parseFloat(document.getElementById('revenueForRPH').value) || 0;
+            
+            if (hours > 0 && revenue > 0) {
+                const rph = revenue / hours;
+                document.getElementById('rphCalcResult').textContent = `RPH: ${rph.toFixed(2)}`;
+                document.getElementById('rphCalcResult').classList.remove('hidden');
+            } else {
+                document.getElementById('rphCalcResult').classList.add('hidden');
+            }
+        }
+
+        document.getElementById('bonusForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const teamRevenue = parseFloat(document.getElementById('teamRevenue').value) || 0;
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const teamComp = document.querySelector('input[name="teamComp"]:checked').value;
+            const position = document.querySelector('input[name="position"]:checked').value;
+            const rphMethod = document.querySelector('input[name="rphMethod"]:checked').value;
+
+            // Calculate or get RPH
+            let rph = 0;
+            if (rphMethod === 'manual') {
+                rph = parseFloat(document.getElementById('rphValue').value) || 0;
+            } else {
+                const hours = parseFloat(document.getElementById('hoursWorked').value) || 0;
+                const revenue = parseFloat(document.getElementById('revenueForRPH').value) || 0;
+                if (hours > 0) {
+                    rph = revenue / hours;
+                }
+            }
+
+            // Check if RPH qualifies for bonus
+            if (rph < 125) {
+                alert('⚠️ RPH must be 125 or higher to earn a bonus. Your current RPH: ' + rph.toFixed(2));
+                return;
+            }
+
+            // Role percentages
+            const rolePercentages = {
+                trainee: 0.01,
+                salesLead: 0.02,
+                certifiedLead: 0.03
+            };
+
+            // Team composition splits
+            const teamSplits = {
+                '1d1n': { driver: 0.60, navigator: 0.40 },
+                '2d': { driver: 0.50 },
+                '2d1n': { driver: 0.35, navigator: 0.30 },
+                '3d': { driver: 0.3333 }
+            };
+
+            // Calculate base revenue split
+            const roleRevenue = teamRevenue * rolePercentages[role];
+            const positionPercentage = teamSplits[teamComp][position];
+            const splitRevenue = roleRevenue * positionPercentage;
+
+            // Determine multiplier based on revenue split
+            let multiplier = 1.0;
+            if (splitRevenue >= 2500) {
+                multiplier = 2.0;
+            } else if (splitRevenue >= 2250) {
+                multiplier = 1.75;
+            } else if (splitRevenue >= 1700) {
+                multiplier = 1.5;
+            } else if (splitRevenue >= 1400) {
+                multiplier = 1.35;
+            } else if (splitRevenue >= 1200) {
+                multiplier = 1.25;
+            }
+
+            // Apply multiplier (RPH is already >= 125 at this point)
+            const rphBonus = splitRevenue * multiplier;
+
+            // Total bonus
+            const totalBonus = rphBonus;
+
+            // Display results
+            document.getElementById('totalBonus').textContent = '$' + totalBonus.toFixed(2);
+            
+            let breakdownHTML = '';
+            breakdownHTML += `<div class="breakdown-item"><span>RPH:</span><span>${rph.toFixed(2)}</span></div>`;
+            breakdownHTML += `<div class="breakdown-item"><span>Base Revenue Split:</span><span>$${splitRevenue.toFixed(2)}</span></div>`;
+            breakdownHTML += `<div class="breakdown-item"><span>Multiplier:</span><span>${multiplier}x</span></div>`;
+            breakdownHTML += `<div class="breakdown-item"><span>TOTAL DAILY BONUS:</span><span>$${totalBonus.toFixed(2)}</span></div>`;
+            
+            document.getElementById('breakdown').innerHTML = breakdownHTML;
+            document.getElementById('result').classList.add('show');
+            
+            // Smooth scroll to result
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    </script>
+</body>
+</html>
